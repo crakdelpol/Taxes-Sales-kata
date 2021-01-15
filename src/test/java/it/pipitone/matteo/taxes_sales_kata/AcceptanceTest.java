@@ -25,4 +25,13 @@ public class AcceptanceTest {
 
     }
 
+    private static class Bucket {
+        public Bucket(String items) {
+
+        }
+
+        public String printReceipt() {
+            return null;
+        }
+    }
 }
