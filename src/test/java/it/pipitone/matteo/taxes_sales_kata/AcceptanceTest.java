@@ -60,12 +60,7 @@ public class AcceptanceTest {
             int itemNumber = Integer.parseInt(matcher.group(1));
             String itemDescription = matcher.group(2);
             BigDecimal price = new BigDecimal(matcher.group(4));
-            if(itemDescription.contains("book")){
-                item = new Item(itemNumber, itemDescription, price);
-            }else {
-                item = new Item(itemNumber, itemDescription, price.multiply(new BigDecimal("1.10"), new MathContext(4, RoundingMode.HALF_UP)));
-            }
-
+            item = new Item(itemNumber, itemDescription, price);
         }
 
         public String printReceipt() {
@@ -75,9 +70,9 @@ public class AcceptanceTest {
 
         private class Item {
 
-            private final int numberOfItem;
-            private final String description;
-            private final BigDecimal price;
+            private int numberOfItem;
+            private String description;
+            private BigDecimal price;
 
             public Item(int numberOfItem, String description, BigDecimal price) {
                 this.numberOfItem = numberOfItem;
@@ -86,7 +81,14 @@ public class AcceptanceTest {
             }
 
             public String printDescription() {
-                return numberOfItem + " " + description + ": " + price.toEngineeringString();
+                return numberOfItem + " " + description + ": " + calculatePrice();
+            }
+
+            public String calculatePrice() {
+                if(!description.contains("book")){
+                   price = price.multiply(new BigDecimal("1.10"), new MathContext(4, RoundingMode.HALF_UP));
+                }
+                return price.toEngineeringString();
             }
         }
     }
