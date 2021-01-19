@@ -56,4 +56,5 @@ Total: 74.68
 - You must release your work with an OSI-approved open source license of your choice.
 - You must deliver the sources of your application, with a README that explains how to compile and run it.
 - Add the code to your own Github account and send us the link.
+
 **IMPORTANT**: Implement the requirements focusing on **writing the best code** you can produce.
