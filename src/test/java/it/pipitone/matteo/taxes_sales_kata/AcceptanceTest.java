@@ -46,6 +46,13 @@ public class AcceptanceTest {
                 "Total: 16.49"));
     }
 
+    @Test
+    public void parseOneItemImported() {
+        Bucket bucket = new Bucket("1 imported box of chocolates at 10.00");
+        String receipt = bucket.printReceipt();
+        assertThat(receipt, is("1 imported box of chocolates: 10.50\n"+
+                "Total: 10.50"));
+    }
 
     private static class Bucket {
 
@@ -100,8 +107,12 @@ public class AcceptanceTest {
 
             public Item createItem(int itemNumber, String itemDescription, BigDecimal price) {
 
-                if(!itemDescription.contains("book")){
+                if(!itemDescription.contains("book") && !itemDescription.contains("chocolates")){
+
                     return new ItemTaxed(itemNumber, itemDescription, price);
+                }
+                if(itemDescription.contains("imported")){
+                    return new ImportedItem(itemNumber, itemDescription, price);
                 }
                 return new ItemWithoutTaxed(itemNumber, itemDescription, price);
             }
@@ -116,6 +127,12 @@ public class AcceptanceTest {
             private static class ItemWithoutTaxed extends GenericItem {
                 public ItemWithoutTaxed(int itemNumber, String itemDescription, BigDecimal price) {
                     super(itemNumber, itemDescription, price, new BigDecimal("1"));
+                }
+            }
+
+            private static class ImportedItem extends GenericItem {
+                public ImportedItem(int itemNumber, String itemDescription, BigDecimal price) {
+                    super(itemNumber, itemDescription, price, new BigDecimal("1.05"));
                 }
             }
         }
