@@ -49,7 +49,7 @@ public class AcceptanceTest {
 
     private static class Bucket {
 
-        private final Item item;
+        private final GenericItem genericItem;
 
         public Bucket(String items) {
             String regex = "(^[0-9]*) ([a-zA-Z ]*) (at) ([0-9.]*)";
@@ -60,21 +60,21 @@ public class AcceptanceTest {
             int itemNumber = Integer.parseInt(matcher.group(1));
             String itemDescription = matcher.group(2);
             BigDecimal price = new BigDecimal(matcher.group(4));
-            item = new Item(itemNumber, itemDescription, price);
+            genericItem = new GenericItem(itemNumber, itemDescription, price);
         }
 
         public String printReceipt() {
-            return item.printDescription() + "\n" +
-                    "Total: " + item.price.toEngineeringString();
+            return genericItem.printDescription() + "\n" +
+                    "Total: " + genericItem.price.toEngineeringString();
         }
 
-        private class Item {
+        private static class GenericItem implements Item {
 
             private int numberOfItem;
             private String description;
             private BigDecimal price;
 
-            public Item(int numberOfItem, String description, BigDecimal price) {
+            public GenericItem(int numberOfItem, String description, BigDecimal price) {
                 this.numberOfItem = numberOfItem;
                 this.description = description;
                 this.price = price;
@@ -84,6 +84,7 @@ public class AcceptanceTest {
                 return numberOfItem + " " + description + ": " + calculatePrice();
             }
 
+            @Override
             public String calculatePrice() {
                 if(!description.contains("book")){
                    price = price.multiply(new BigDecimal("1.10"), new MathContext(4, RoundingMode.HALF_UP));
