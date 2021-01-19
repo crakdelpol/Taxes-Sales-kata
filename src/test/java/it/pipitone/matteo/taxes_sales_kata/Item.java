@@ -4,11 +4,7 @@ import java.math.BigDecimal;
 
 public interface Item {
 
-    String getName();
-
-    Integer getNumber();
-
     BigDecimal calculatePrice();
 
-    String printDescription(Integer number, String name, BigDecimal price);
+    String printDescription();
 }
