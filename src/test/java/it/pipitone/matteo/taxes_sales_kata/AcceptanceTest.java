@@ -102,7 +102,7 @@ public class AcceptanceTest {
 
             @Override
             public String printDescription(Integer number, String name, BigDecimal price) {
-                return numberOfItem + " " + description + ": " + price;
+                return number + " " + name + ": " + price;
             }
         }
 
@@ -135,7 +135,7 @@ public class AcceptanceTest {
 
         }
 
-        private class TaxedItemDecorator extends ItemDecorator {
+        private static class TaxedItemDecorator extends ItemDecorator {
 
             public TaxedItemDecorator(Item itemDecorator) {
                 super(itemDecorator);
