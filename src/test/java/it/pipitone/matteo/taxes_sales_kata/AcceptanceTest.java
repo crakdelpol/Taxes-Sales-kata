@@ -49,7 +49,7 @@ public class AcceptanceTest {
 
     private static class Bucket {
 
-        private final Item genericItem;
+        private Item itemDecorator;
 
         public Bucket(String items) {
             String regex = "(^[0-9]*) ([a-zA-Z ]*) (at) ([0-9.]*)";
@@ -60,19 +60,24 @@ public class AcceptanceTest {
             int itemNumber = Integer.parseInt(matcher.group(1));
             String itemDescription = matcher.group(2);
             BigDecimal price = new BigDecimal(matcher.group(4));
-            genericItem = new GenericItem(itemNumber, itemDescription, price);
+
+            itemDecorator = new ItemDecorator(new GenericItem(itemNumber, itemDescription, price));
+            if(!itemDescription.contains("book")){
+                itemDecorator = new TaxedItemDecorator(itemDecorator);
+            }
+
         }
 
         public String printReceipt() {
-            return genericItem.printDescription() + "\n" +
-                    "Total: " + genericItem.calculatePrice();
+            return itemDecorator.printDescription(itemDecorator.getNumber(), itemDecorator.getName(), itemDecorator.calculatePrice()) + "\n" +
+                    "Total: " + itemDecorator.calculatePrice().toEngineeringString();
         }
 
         private static class GenericItem implements Item {
 
-            private final int numberOfItem;
-            private final String description;
-            private final BigDecimal price;
+            protected final int numberOfItem;
+            protected final String description;
+            protected final BigDecimal price;
 
             public GenericItem(int numberOfItem, String description, BigDecimal price) {
                 this.numberOfItem = numberOfItem;
@@ -80,17 +85,67 @@ public class AcceptanceTest {
                 this.price = price;
             }
 
-            public String printDescription() {
-                return numberOfItem + " " + description + ": " + calculatePrice();
+            @Override
+            public String getName() {
+                return description;
             }
 
             @Override
-            public String calculatePrice() {
-                if(!description.contains("book")){
-                   return price.multiply(new BigDecimal("1.10"), new MathContext(4, RoundingMode.HALF_UP)).toEngineeringString();
-                }
-                return price.toEngineeringString();
+            public Integer getNumber() {
+                return numberOfItem;
             }
+
+            @Override
+            public BigDecimal calculatePrice() {
+                return price;
+            }
+
+            @Override
+            public String printDescription(Integer number, String name, BigDecimal price) {
+                return numberOfItem + " " + description + ": " + price;
+            }
+        }
+
+        private static class ItemDecorator implements Item {
+            Item decorated;
+
+            public ItemDecorator(Item decorated) {
+                this.decorated = decorated;
+            }
+
+            @Override
+            public String getName() {
+                return decorated.getName();
+            }
+
+            @Override
+            public Integer getNumber() {
+                return decorated.getNumber();
+            }
+
+            @Override
+            public BigDecimal calculatePrice() {
+                return decorated.calculatePrice();
+            }
+
+            @Override
+            public String printDescription(Integer number, String name, BigDecimal price) {
+                return decorated.printDescription(number, name, price);
+            }
+
+        }
+
+        private class TaxedItemDecorator extends ItemDecorator {
+
+            public TaxedItemDecorator(Item itemDecorator) {
+                super(itemDecorator);
+            }
+
+            @Override
+            public BigDecimal calculatePrice() {
+                return super.calculatePrice().multiply(new BigDecimal("1.10"), new MathContext(4, RoundingMode.HALF_UP));
+            }
+
         }
     }
 }

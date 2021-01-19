@@ -1,7 +1,14 @@
 package it.pipitone.matteo.taxes_sales_kata;
 
-public interface Item {
-    String calculatePrice();
+import java.math.BigDecimal;
 
-    String printDescription();
+public interface Item {
+
+    String getName();
+
+    Integer getNumber();
+
+    BigDecimal calculatePrice();
+
+    String printDescription(Integer number, String name, BigDecimal price);
 }
