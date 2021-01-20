@@ -55,7 +55,7 @@ public class AcceptanceTest {
     }
 
     @Test
-    public void parseImportedWithTaxes() {
+    public void parseImportedItemWithTaxes() {
         Bucket bucket = new Bucket("1 imported bottle of perfume at 47.50");
         String receipt = bucket.printReceipt();
         assertThat(receipt, is("1 imported bottle of perfume: 54.65\n"+
