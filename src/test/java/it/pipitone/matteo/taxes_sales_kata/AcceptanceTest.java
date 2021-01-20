@@ -34,6 +34,36 @@ public class AcceptanceTest {
     }
 
     @Test
+    public void secondAcceptanceTest() {
+        Bucket bucket = new Bucket("1 imported box of chocolates at 10.00\n" +
+                "1 imported bottle of perfume at 47.50");
+
+        String receipt = bucket.printReceipt();
+
+        assertThat(receipt, is("1 imported box of chocolates: 10.50\n" +
+                "1 imported bottle of perfume: 54.65\n" +
+                "Sales Taxes: 7.65\n" +
+                "Total: 65.15"));
+    }
+
+    @Test
+    public void thirdAcceptanceTest() {
+        Bucket bucket = new Bucket("1 imported bottle of perfume at 27.99\n" +
+                "1 bottle of perfume at 18.99\n" +
+                "1 packet of headache pills at 9.75\n" +
+                "1 box of imported chocolates at 11.25");
+
+        String receipt = bucket.printReceipt();
+
+        assertThat(receipt, is("1 imported bottle of perfume: 32.19\n" +
+                "1 bottle of perfume: 20.89\n" +
+                "1 packet of headache pills: 9.75\n" +
+                "1 imported box of chocolates: 11.85\n" +
+                "Sales Taxes: 6.70\n" +
+                "Total: 74.68"));
+    }
+
+    @Test
     public void parseOneItem() {
         Bucket bucket = new Bucket("1 book at 12.49");
         String receipt = bucket.printReceipt();
@@ -144,7 +174,7 @@ public class AcceptanceTest {
 
                 boolean isImportedItem = itemDescription.contains("imported");
                 
-                if(!itemDescription.contains("book") && !itemDescription.contains("chocolate")){
+                if(!itemDescription.contains("book") && !itemDescription.contains("chocolate") && !itemDescription.contains("pills")){
                     if(isImportedItem){
                         return new ImportedItem(itemNumber, itemDescription, price);
                     }
