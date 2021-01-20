@@ -7,4 +7,6 @@ public interface Item {
     BigDecimal calculatePrice();
 
     String printDescription();
+
+    BigDecimal getTaxes();
 }
