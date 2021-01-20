@@ -54,6 +54,14 @@ public class AcceptanceTest {
                 "Total: 10.50"));
     }
 
+    @Test
+    public void parseImportedWithTaxes() {
+        Bucket bucket = new Bucket("1 imported bottle of perfume at 47.50");
+        String receipt = bucket.printReceipt();
+        assertThat(receipt, is("1 imported bottle of perfume: 54.65\n"+
+                "Total: 54.65"));
+    }
+
     private static class Bucket {
 
         private Item genericItem;
@@ -91,7 +99,13 @@ public class AcceptanceTest {
 
             @Override
             public BigDecimal calculatePrice() {
-                return price.multiply(taxes, new MathContext(4, RoundingMode.HALF_UP));
+                BigDecimal result = price.multiply(taxes, new MathContext(4, RoundingMode.HALF_UP));
+                if(description.contains("imported")){
+                    BigDecimal decimalValue= result.remainder(BigDecimal.ONE).movePointRight(result.scale()).abs();
+                    BigDecimal decimalValueRounded = BigDecimal.valueOf(5 * (Math.ceil(Math.abs(decimalValue.divide(new BigDecimal("5"), RoundingMode.HALF_UP).doubleValue())))).divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP);
+                    result =  result.subtract(decimalValue.divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP)).add(decimalValueRounded).stripTrailingZeros();
+                }
+                return result;
             }
 
             @Override
@@ -108,11 +122,13 @@ public class AcceptanceTest {
             public Item createItem(int itemNumber, String itemDescription, BigDecimal price) {
 
                 if(!itemDescription.contains("book") && !itemDescription.contains("chocolates")){
-
+                    if(itemDescription.contains("imported")){
+                        return new ImportedItem(itemNumber, itemDescription, price);
+                    }
                     return new ItemTaxed(itemNumber, itemDescription, price);
                 }
                 if(itemDescription.contains("imported")){
-                    return new ImportedItem(itemNumber, itemDescription, price);
+                    return new ImportedItemWithoutTaxes(itemNumber, itemDescription, price);
                 }
                 return new ItemWithoutTaxed(itemNumber, itemDescription, price);
             }
@@ -130,9 +146,15 @@ public class AcceptanceTest {
                 }
             }
 
-            private static class ImportedItem extends GenericItem {
-                public ImportedItem(int itemNumber, String itemDescription, BigDecimal price) {
+            private static class ImportedItemWithoutTaxes extends GenericItem {
+                public ImportedItemWithoutTaxes(int itemNumber, String itemDescription, BigDecimal price) {
                     super(itemNumber, itemDescription, price, new BigDecimal("1.05"));
+                }
+            }
+
+            private static class ImportedItem extends GenericItem{
+                public ImportedItem(int itemNumber, String itemDescription, BigDecimal price) {
+                    super(itemNumber, itemDescription, price, new BigDecimal("1.15"));
                 }
             }
         }
