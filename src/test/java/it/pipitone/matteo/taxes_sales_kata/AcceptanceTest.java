@@ -102,8 +102,8 @@ public class AcceptanceTest {
                 BigDecimal result = price.multiply(taxes, new MathContext(4, RoundingMode.HALF_UP));
                 if(description.contains("imported")){
                     BigDecimal decimalValue= result.remainder(BigDecimal.ONE).movePointRight(result.scale()).abs();
-                    BigDecimal decimalValueRounded = BigDecimal.valueOf(5 * (Math.ceil(Math.abs(decimalValue.divide(new BigDecimal("5"), RoundingMode.HALF_UP).doubleValue())))).divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP);
-                    result =  result.subtract(decimalValue.divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP)).add(decimalValueRounded).stripTrailingZeros();
+                    BigDecimal decimalValueRounded = BigDecimal.valueOf(5 * (Math.ceil(Math.abs(decimalValue.divide(new BigDecimal("5"), RoundingMode.HALF_UP).doubleValue())))).divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
+                    result =  result.subtract(decimalValue.divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP)).add(decimalValueRounded);
                 }
                 return result;
             }
