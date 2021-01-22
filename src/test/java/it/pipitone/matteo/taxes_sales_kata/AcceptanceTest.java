@@ -30,7 +30,6 @@ public class AcceptanceTest {
                 "1 chocolate bar: 0.85\n" +
                 "Sales Taxes: 1.50\n" +
                 "Total: 29.83"));
-
     }
 
     @Test
@@ -96,19 +95,17 @@ public class AcceptanceTest {
     private static class Bucket {
 
         private final List<Item> genericItem = new ArrayList<>();
+        private final ItemFactory itemFactory;
 
         public Bucket(String itemsString) {
-            String[] items = itemsString.split("\n");
-            String regex = "(^[0-9]*) ([a-zA-Z ]*) (at) ([0-9.]*)";
-            Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
 
-            for (int i = 0; i < items.length; i++) {
-                Matcher matcher = pattern.matcher(items[i]);
-                boolean found = matcher.find();
-                int itemNumber = Integer.parseInt(matcher.group(1));
-                String itemDescription = matcher.group(2);
-                BigDecimal price = new BigDecimal(matcher.group(4));
-                genericItem.add(new ItemFactory().createItem(itemNumber, itemDescription, price));
+            this.itemFactory = new ItemFactory();;
+            String[] items = itemsString.split("\n");
+
+            for (String item : items) {
+                ParameterConverter parameterConverter = new ParameterConverter(item);
+                Item item1 = itemFactory.createItem(parameterConverter.itemNumber, parameterConverter.itemDescription, parameterConverter.price);
+                genericItem.add(item1);
             }
 
         }
@@ -142,7 +139,9 @@ public class AcceptanceTest {
                 taxes = price.multiply(this.taxesPercents.subtract(BigDecimal.ONE), new MathContext(3, RoundingMode.HALF_UP));
 
                 BigDecimal result = price.add(taxes);
+
                 if(description.contains("imported")){
+
                     BigDecimal decimalValue= result.remainder(BigDecimal.ONE).movePointRight(result.scale()).abs();
                     BigDecimal decimalValueRounded = BigDecimal.valueOf(5 * (Math.ceil(Math.abs(decimalValue.divide(new BigDecimal("5"), RoundingMode.HALF_UP).doubleValue())))).divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
 
@@ -173,10 +172,10 @@ public class AcceptanceTest {
             public Item createItem(int itemNumber, String itemDescription, BigDecimal price) {
 
                 boolean isImportedItem = itemDescription.contains("imported");
-                
+
                 if(!itemDescription.contains("book") && !itemDescription.contains("chocolate") && !itemDescription.contains("pills")){
                     if(isImportedItem){
-                        return new ImportedItem(itemNumber, itemDescription, price);
+                        return new ImportedItemTaxed(itemNumber, itemDescription, price);
                     }
                     return new ItemTaxed(itemNumber, itemDescription, price);
                 }
@@ -205,10 +204,25 @@ public class AcceptanceTest {
                 }
             }
 
-            private static class ImportedItem extends GenericItem{
-                public ImportedItem(int itemNumber, String itemDescription, BigDecimal price) {
+            private static class ImportedItemTaxed extends GenericItem{
+                public ImportedItemTaxed(int itemNumber, String itemDescription, BigDecimal price) {
                     super(itemNumber, itemDescription, price, new BigDecimal("1.15"));
                 }
+            }
+        }
+
+        private class ParameterConverter {
+            public final int itemNumber;
+            public final String itemDescription;
+            public final BigDecimal price;
+            public ParameterConverter(String item) {
+                String regex = "(^[0-9]*) ([a-zA-Z ]*) (at) ([0-9.]*)";
+                Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
+                Matcher matcher = pattern.matcher(item);
+                boolean found = matcher.find();
+                itemNumber = Integer.parseInt(matcher.group(1));
+                itemDescription = matcher.group(2);
+                price = new BigDecimal(matcher.group(4));
             }
         }
     }
